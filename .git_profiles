@@ -1,0 +1,10 @@
+[travelnest]
+author = "David Futcher"
+username = "david-tn"
+email = "david.futcher@travelnest.com"
+
+[bobbo]
+author = "David Futcher"
+email = "david@futcher.io"
+username = "bobbo"
+url = "git@github.com-{{username}}:{{username}}/{{project}}.git"
