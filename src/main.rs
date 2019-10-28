@@ -112,7 +112,7 @@ impl GitProfilesApp<'_> {
         return Ok(profiles);
     }
 
-    fn get_profile<'a>(&'a self, profile_name: String) -> Option<&'a Profile> {
+    fn get_profile(&self, profile_name: String) -> Option<&Profile> {
         if let Some(profiles) = &self.profiles {
             return profiles.iter().find(|p| p.name == profile_name)
         }
@@ -120,8 +120,21 @@ impl GitProfilesApp<'_> {
         None
     }
 
+    fn get_profile_by_email(&self, email: String) -> Option<&Profile> {
+        if let Some(profiles) = &self.profiles {
+            return profiles.iter().find(|p| p.email == email);
+        }
+
+        None
+    }
+
     fn get_default_profile(&self) -> Option<&Profile> {
-        // TODO: Do some smart stuff with git config user.email etc.
+        // TODO: Need to handle the case this is run in a non-gitified dir
+        let email = git_command(vec!["config", "user.email"]);
+        if let Some(profile) = self.get_profile_by_email(email) {
+            return Some(profile);
+        }
+
         if let Some(profiles) = &self.profiles {
             if profiles.len() > 0 {
                 return Some(&self.profiles.as_ref().unwrap()[0]);
@@ -180,9 +193,9 @@ fn git_command(args: Vec<&str>) -> String {
     }
 
     let output_streams = command.output().expect("failed to execute process");
-    let output = std::str::from_utf8(&output_streams.stdout).unwrap().to_string();
+    let output = std::str::from_utf8(&output_streams.stdout).unwrap().trim_end();
 
-    return output;
+    return output.to_string();
 }
 
 fn main() {
@@ -200,7 +213,7 @@ fn main() {
                 let project_name = sub_matches.value_of("PROJECT").unwrap();
                 let profile_name = sub_matches.value_of("PROFILE").map(|x| x.to_string());
                 app.handle_url(project_name.to_string(), profile_name);
-            }
+            },
             _ => println!("other"),
         };
     }
