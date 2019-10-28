@@ -86,13 +86,23 @@ impl GitProfilesApp<'_> {
                                 .short("p")
                                 .long("profile")
                                 .takes_value(true)
-                                .help("Project name"))
+                                .help("Profile to use"))
+                )
+                .subcommand(
+                    SubCommand::with_name("author")
+                        .about("Get profile's author string in git format")
+                        .arg(Arg::with_name("PROFILE")
+                                .short("p")
+                                .long("profile")
+                                .help("Profile to use")
+                                .takes_value(true))
                 )
                 .get_matches());
     }
 
     fn load_profiles(&mut self) -> Result<Vec<Profile>, std::io::Error> {
         let mut profiles = Vec::new();
+        // TODO: Use home-dir here ... also handle first-run no file etc.
         let mut file = File::open(".git_profiles")?;
         let mut contents = String::new();
 
@@ -183,6 +193,23 @@ impl GitProfilesApp<'_> {
             }
         };
     }
+
+    fn handle_author(&self, profile_name: Option<String>) {
+        let profile_opt = match profile_name {
+            Some(name) => self.get_profile(name),
+            None => self.get_default_profile()
+        };
+
+        match profile_opt {
+            None => {
+                println!("{:?}", self.profiles);
+                println!("Couldn't find specified profile, or work out a default");
+            },
+            Some(profile) => {
+                println!("{} <{}>", profile.author, profile.email);
+            }
+        }
+    }
 }
 
 fn git_command(args: Vec<&str>) -> String {
@@ -214,6 +241,10 @@ fn main() {
                 let profile_name = sub_matches.value_of("PROFILE").map(|x| x.to_string());
                 app.handle_url(project_name.to_string(), profile_name);
             },
+            ("author", Some(sub_matches)) => {
+                let profile = sub_matches.value_of("PROFILE").map(|x| x.to_string());
+                app.handle_author(profile);
+            }
             _ => println!("other"),
         };
     }
