@@ -1,10 +1,12 @@
 extern crate clap;
+extern crate dirs;
 extern crate serde_derive;
 extern crate ramhorns;
 
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::vec::Vec;
 
@@ -100,18 +102,23 @@ impl GitProfilesApp<'_> {
                 .get_matches());
     }
 
-    fn load_profiles(&mut self) -> Result<Vec<Profile>, std::io::Error> {
-        let mut profiles = Vec::new();
-        // TODO: Use home-dir here ... also handle first-run no file etc.
-        let mut file = File::open(".git_profiles")?;
-        let mut contents = String::new();
+    fn profiles_file_path(&self) -> Option<PathBuf> {
+        match dirs::home_dir() {
+            Some(mut path) => {
+                path.push(".git_profiles");
+                Some(path)
+            },
+            _ => None
+        }
+    }
 
-        file.read_to_string(&mut contents)?;
-
+    fn parse_profiles(&self, contents: String) -> Result<Vec<Profile>, std::io::Error> {
         let data_tables = match toml::from_str(&contents)? {
             Value::Table(table) => table.into_iter().collect(),
             _ => HashMap::new(),
         };
+
+        let mut profiles = Vec::new();
 
         for (key, value) in data_tables {
             let mut profile: Profile = value.try_into()?;
@@ -119,7 +126,22 @@ impl GitProfilesApp<'_> {
             profiles.push(profile);
         }
 
-        return Ok(profiles);
+        Ok(profiles)
+    }
+
+    fn load_profiles(&mut self) -> Result<Vec<Profile>, std::io::Error> {
+        let path_buf = self.profiles_file_path().unwrap_or(PathBuf::from(".git_profile"));
+        let path = path_buf.as_path();
+       
+        if Path::exists(path) {
+            let mut file = File::open(path)?;
+            let mut contents = String::new();
+
+            file.read_to_string(&mut contents)?;
+            return self.parse_profiles(contents);
+        }
+
+        Ok(vec![])
     }
 
     fn get_profile(&self, profile_name: String) -> Option<&Profile> {
@@ -154,17 +176,46 @@ impl GitProfilesApp<'_> {
         None
     }
 
+    /// Unwraps the profile name (or falls back to a reasonable default) then executes the closure with the profile
+    /// as it's argument
+    fn with_profile<F>(&self, name: Option<String>, f: F) 
+        where F: Fn(&Profile) -> ()
+    {
+        let profile_opt = match name {
+            Some(name) => self.get_profile(name),
+            None => self.get_default_profile()
+        };
+
+        match profile_opt {
+            None => {
+                println!("Couldn't find specified profile, or work out a default");
+            },
+            Some(profile) => {
+                f(profile);
+            }
+        }
+    }
+
     fn handle_list(&self) {
+        let no_profiles = || println!("No profiles defined");
+
         if let Some(profiles) = &self.profiles {
+            if profiles.len() == 0 {
+                no_profiles();
+                return
+            }
+
             for profile in profiles {
                 println!("{}", profile.name);
             }
+        } else {
+            no_profiles();
         }
     }
 
     fn handle_use(&self, target: String) {
         let profile = self.get_profile(target)
-            .expect("Invalid profile name"); // TODO: handle error case
+            .expect("Could not find target profile"); // TODO: handle error case
 
         // TODO: These have results
         git_command(vec!["config", "user.name", profile.author.as_ref()]);
@@ -172,43 +223,19 @@ impl GitProfilesApp<'_> {
     }
 
     fn handle_url(&self, project_name: String, profile_name: Option<String>) {
-        let profile_opt = match profile_name {
-            Some(name) => self.get_profile(name),
-            None => self.get_default_profile()
-        };
+        self.with_profile(profile_name, |p| {
+            let urlspec = match &p.url {
+                Some(url) => url.as_ref(),
+                None => "git@github.com:{{username}}/{{project}}"
+            };
 
-        match profile_opt {
-            None => {
-                println!("{:?}", self.profiles);
-                println!("Couldn't find specified profile, or work out a default");
-            },
-            Some(profile) => {
-                let urlspec = match &profile.url {
-                    Some(url) => url.as_ref(),
-                    None => "git@github.com:{{username}}/{{project}}"
-                };
-
-                let template = Template::new(urlspec).unwrap(); // TODO: danger unwrap
-                println!("{}", template.render(&profile.render_data(project_name.to_string())));
-            }
-        };
+            let template = Template::new(urlspec).expect("Failed to create template from urlspec");
+            println!("{}", template.render(&p.render_data(project_name.to_string())));
+        });
     }
 
     fn handle_author(&self, profile_name: Option<String>) {
-        let profile_opt = match profile_name {
-            Some(name) => self.get_profile(name),
-            None => self.get_default_profile()
-        };
-
-        match profile_opt {
-            None => {
-                println!("{:?}", self.profiles);
-                println!("Couldn't find specified profile, or work out a default");
-            },
-            Some(profile) => {
-                println!("{} <{}>", profile.author, profile.email);
-            }
-        }
+        self.with_profile(profile_name, |p| println!("{} <{}>", p.author, p.email));
     }
 }
 
@@ -226,7 +253,7 @@ fn git_command(args: Vec<&str>) -> String {
 }
 
 fn main() {
-    let app = GitProfilesApp::new().expect("failed to initialise");
+    let app = GitProfilesApp::new().expect("no profiles defined");
 
     if let Some(args) = &app.args {
         match args.subcommand() {
@@ -245,8 +272,7 @@ fn main() {
                 let profile = sub_matches.value_of("PROFILE").map(|x| x.to_string());
                 app.handle_author(profile);
             }
-            _ => println!("other"),
+            _ => println!("{}", args.usage()), // TODO: Should list sub-commands
         };
     }
-
 }
