@@ -4,6 +4,7 @@ extern crate serde_derive;
 extern crate ramhorns;
 
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::fs;
 use std::io::prelude::*;
@@ -104,7 +105,7 @@ impl GitProfilesApp<'_> {
 
     fn parse_args(&mut self) {
         self.args = Some(App::new("git-profile")
-                .version("1.0")
+                .version("0.1")
                 .author("David Futcher <david@futcher.io>")
                 .about("Easy profiles for git")
                 .subcommand(
@@ -125,9 +126,11 @@ impl GitProfilesApp<'_> {
                                 .short("r")
                                 .long("remote")
                                 .takes_value(true))
+                        // TODO: Add --edit arg, opens file in editor _after_ writing new profile data
                 )
                 .subcommand(
-                    SubCommand::with_name("list")
+                    App::new("list")
+                        .alias("ls")
                         .about("List profiles"))
                 .subcommand(
                     SubCommand::with_name("use")
@@ -156,6 +159,13 @@ impl GitProfilesApp<'_> {
                                 .short("p")
                                 .long("profile")
                                 .help("Profile to use")
+                                .takes_value(true))
+                )
+                .subcommand(
+                    SubCommand::with_name("edit")
+                        .about("Edit profiles")  
+                        .arg(Arg::with_name("EDITOR")
+                                .long("editor")
                                 .takes_value(true))
                 )
                 .get_matches());
@@ -189,7 +199,7 @@ impl GitProfilesApp<'_> {
     }
 
     fn load_profiles(&mut self) -> Result<Vec<Profile>, std::io::Error> {
-        let path_buf = self.profiles_file_path().unwrap_or(PathBuf::from(".git_profiles"));
+        let path_buf = self.profiles_file_path().expect("expected valid profile file-path");
         let path = path_buf.as_path();
        
         if Path::exists(path) {
@@ -205,7 +215,7 @@ impl GitProfilesApp<'_> {
 
     fn save_profiles(&self, profiles: Vec<&Profile>) -> Result<(), Box<dyn Error>> {
         // TODO: ".git_profile" magic string, this logic is used twice
-        let path_buf = self.profiles_file_path().unwrap_or(PathBuf::from(".git_profiles"));
+        let path_buf = self.profiles_file_path().expect("expected valid profile file-path");
         let path = path_buf.as_path();
 
         if !Path::exists(path) {
@@ -363,6 +373,31 @@ impl GitProfilesApp<'_> {
             Err(e) => println!("Profile create failed: {}", e)
         };
     }
+
+    fn handle_edit(&self, editor_opt: Option<&str>) {
+        let editor: String;
+        if let Some(val) = editor_opt {
+            editor = val.to_owned();
+        } else if let Ok(val) = env::var("EDITOR") {
+            editor = val;
+        } else {
+            // TODO: Better fallback value needed
+            editor = "vim".to_owned();
+        }
+
+        let path = self.profiles_file_path().expect("Failed to get profiles file path");
+
+        let result = Command::new(editor)
+                        .arg(path)
+                        .status()
+                        .expect("edit command failed");
+
+        if result.success() {
+            println!("Edit success!");
+        } else {
+            println!("Edit failed");
+        }
+    }
 }
 
 fn git_command(args: Vec<&str>) -> String {
@@ -379,6 +414,8 @@ fn git_command(args: Vec<&str>) -> String {
 }
 
 fn main() {
+    // TODO: This expect() causes 'edit' and 'new' to fail when we can't load profiles - we _definitely_ do not want
+    //       this to be the case.
     let app = GitProfilesApp::new().expect("no profiles defined");
 
     if let Some(args) = &app.args {
@@ -405,7 +442,11 @@ fn main() {
             ("author", Some(sub_matches)) => {
                 let profile_name = sub_matches.value_of("PROFILE");
                 app.handle_author(profile_name);
-            }
+            },
+            ("edit", Some(sub_matches)) => {
+                let editor = sub_matches.value_of("EDITOR");
+                app.handle_edit(editor);
+            },
             _ => println!("{}", args.usage()), // TODO: Should list sub-commands
         };
     }
