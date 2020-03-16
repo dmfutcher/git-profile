@@ -34,6 +34,46 @@ List all the profiles. An asterisk will appear next to the currently enabled pro
 
 `git profile ls`
 
+### Use with ssh config
+If your different profiles each have different ssh key-pairs set-up,
+you can configure git-profile to use them via shared ssh-hosts and usernames:
+
+`~/.ssh/config`:
+
+```ini
+# WORK GITHUB SSH CONFIG
+Host work.github.com
+   HostName github.com
+   IdentityFile ~/.ssh/work_github_rsa
+   PreferredAuthentications publickey
+   IdentitiesOnly yes
+
+# OPEN SOURCE GITHUB SSH CONFIG
+Host oss.github.com
+    Hostname github.com
+    IdentityFile ~/.ssh/oss_github_rsa
+    PreferredAuthentications publickey
+    IdentitiesOnly yes
+```
+
+`~/.git_profiles`:
+
+```toml
+[gh-work]
+author = 'Forename Surname (at work)'
+email = 'me@work.com'
+username = 'MyWorkGithubOrganization'
+url = 'git@work.github.com:{{username}}/{{project}}.git'
+
+[open-source]
+author = 'Forename Surname'
+email = 'my.open.source.contribs@example.com'
+username = 'my-oss-github-account'
+url = 'git@oss.github.com:{{username}}/{{project}}.git'
+```
+
+You can then `git clone ...` from using the correc key like ...
+
 ### Generate remote URL
 git-profile can be used to generate remote URLs for your repos. This can be helpful if you have a complicated SSH
 set-up that uses custom domains to use the right keys. Or just to save you having to navigate around GitHub Web
