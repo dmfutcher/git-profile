@@ -11,44 +11,47 @@ your life easier.
 *git-profile* should be installed as a binary named `git-profile`. The `git-` prefix means we can use it like any other
 git command.
 
-### Create a Profile
+### Create a profile
 At a minimum you need a profile name (best to keep this quite short), your author name and author email.
+
 `git profile add github 'Forename Surname' 'open-source@personal.com'`
 
 Create a profile with a custom URL scheme:
+
 `git profile add github-work 'Forname Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
 
 ### Switch profiles
-The `use` command lets you trivially switch between profiles:
+The `use` command switches you between profiles. This sets the profile for the repository in your current working directory.
+
 `git profile use github-work`
+
 `git profile use open-source`
 
-This sets the `git config user.name` and `git config user.email` to the author name & email in that profile. Note this sets
-the config for your current repository only.
 
-### List all your profiles
-List all the profiles. An asterisk will appear next to the current enabled profile.
+### List profiles
+List all the profiles. An asterisk will appear next to the currently enabled profile.
+
 `git profile ls`
 
-### Generate a URL
+### Generate remote URL
 git-profile can be used to generate remote URLs for your repos. This can be helpful if you have a complicated SSH
 set-up that uses custom domains to use the right keys. Or just to save you having to navigate around GitHub Web
 and copy and paste remote URLs.
 
 Generate a URL for a given project name:
+
 `git profile url project-name`
 
 Use `-p <profile-name>` to generate using a different profile.
+
 `git profile url -p github-work your-project`
 
-This is particularly handy when used in a sub-shell and combined with `git-remote`. 
+This is particularly handy when used in a sub-shell and combined with `git-remote`:
+
 `git remote add origin $(git profile url -p github-work my-work-project)`
 
 ### Generate author string
-`git profile author` => 'Forname Surname <your@email.address>
-
-### Edit profiles in an editor
-`git profile edit` opens your `.git_profiles` in `$EDITOR`
+`git profile author` => 'Forename Surname \<your@email.address\>'
 
 Can be used to easily fix commits when you've committed under the wrong profile:
 ```
@@ -57,10 +60,14 @@ git profile use github-work
 git commit --amend --author $(git profile author)
 ```
 
+### Edit profiles
+`git profile edit` opens your `.git_profiles` in `$EDITOR`. Defaults to `vim` if you don't have `$EDITOR` set.
+
+
 ## Status
 
-*git-profile is in early development*. It's solves most of my major issues with using multiple identities with git. 
-If you have a feature request or run into a bug, please open an issue.
+*git-profile is in early development*. It's solves most of my major issues with using multiple identities with git, but it's by no means perfect.
+If you run into a bug or have a feature request, please open an issue. It should work fine on Mac & Linux, it probably won't work as-is on Windows.
 
 
 ## License
