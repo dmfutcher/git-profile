@@ -1,8 +1,11 @@
 [package]
 name = "git-profile"
+description = "Easy user profiles for git"
 version = "0.1.0"
 authors = ["David Futcher <david@futcher.io>"]
 edition = "2018"
+license-file = "LICENSE"
+repository = "https://github.com/bobbo/git-profile"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
