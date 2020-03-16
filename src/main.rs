@@ -107,7 +107,7 @@ impl GitProfilesApp<'_> {
         self.args = Some(App::new("git-profile")
                 .version("0.1")
                 .author("David Futcher <david@futcher.io>")
-                .about("Easy profiles for git")
+                .about("Easy multi-identity profiles for git")
                 .subcommand(
                     SubCommand::with_name("new")
                         .about("Create new profile")
@@ -139,6 +139,7 @@ impl GitProfilesApp<'_> {
                                 .help("Profile to operate on")
                                 .required(true)
                                 .takes_value(true))
+                        // TODO: Add --global flag, operating on git config --global
                 )
                 .subcommand(
                     SubCommand::with_name("url")
@@ -214,7 +215,6 @@ impl GitProfilesApp<'_> {
     }
 
     fn save_profiles(&self, profiles: Vec<&Profile>) -> Result<(), Box<dyn Error>> {
-        // TODO: ".git_profile" magic string, this logic is used twice
         let path_buf = self.profiles_file_path().expect("expected valid profile file-path");
         let path = path_buf.as_path();
 
@@ -328,8 +328,7 @@ impl GitProfilesApp<'_> {
         // handle profile lookup manually
         let profile = self.get_profile(target).expect("Could not find target profile");
 
-        // TODO: These have results
-        // TODO: handle --global option here?
+        // TODO: These have results we should probably pay attention to
         git_command(vec!["config", "user.name", profile.author.as_ref()]);
         git_command(vec!["config", "user.email", profile.email.as_ref()]);
     }
@@ -381,7 +380,7 @@ impl GitProfilesApp<'_> {
         } else if let Ok(val) = env::var("EDITOR") {
             editor = val;
         } else {
-            // TODO: Better fallback value needed
+            // TODO: Better fallback value needed, won't work too nicely with Windows
             editor = "vim".to_owned();
         }
 
@@ -414,9 +413,7 @@ fn git_command(args: Vec<&str>) -> String {
 }
 
 fn main() {
-    // TODO: This expect() causes 'edit' and 'new' to fail when we can't load profiles - we _definitely_ do not want
-    //       this to be the case.
-    let app = GitProfilesApp::new().expect("no profiles defined");
+    let app = GitProfilesApp::new().expect("profile loading failed, check your profile config");
 
     if let Some(args) = &app.args {
         match args.subcommand() {

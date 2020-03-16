@@ -1,20 +1,14 @@
 git-profile
 ==========
 
-*git-profile* is a simple user profile manager for *git*. It lets you easily set-up user profiles for git & switch
-between them, generate remote URLs and more. *git-profile* can help if you:
-
-  * Do open-source work & 9-to-5 work from the same machine
-  * Freelancer & have lots of different organisations to work with
-  * Use multiple git hosts at once
-  * Have an SSH setup that needs you to use strange URLs to push with the right keys (`github.com-{username}` is a
-    common pattern seen on StackOverflow etc.)
-
+*git-profile* is a simple user profile manager for *git*. It lets you set-up multiple user profiles for git & switch
+between them, generate remote URLs and more. If you ever have to manage multiple identities with git, *git-profile* can make
+your life easier.
 
 
 ## Usage
 
-*git-profile* should be installed as a binary named `git-profile`. The `git-` suffix means we can use it like any other
+*git-profile* should be installed as a binary named `git-profile`. The `git-` prefix means we can use it like any other
 git command.
 
 ### Create a Profile
@@ -27,9 +21,10 @@ Create a profile with a custom URL scheme:
 ### Switch profiles
 The `use` command lets you trivially switch between profiles:
 `git profile use github-work`
-`git profile use freelance-company-39`
+`git profile use open-source`
 
-This sets the local `git config user.name` and `git config user.email` to the author name & email in that profile.
+This sets the `git config user.name` and `git config user.email` to the author name & email in that profile. Note this sets
+the config for your current repository only.
 
 ### List all your profiles
 List all the profiles. An asterisk will appear next to the current enabled profile.
@@ -64,7 +59,8 @@ git commit --amend --author $(git profile author)
 
 ## Status
 
-*git-profile is in early development*. Use early stage software with caution.
+*git-profile is in early development*. It's solves most of my major issues with using multiple identities with git. 
+If you have a feature request or run into a bug, please open an issue.
 
 
 ## License
