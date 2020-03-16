@@ -5,11 +5,12 @@ git-profile
 between them, generate remote URLs and more. If you ever have to manage multiple identities with git, *git-profile* can make
 your life easier.
 
+## Install
+
+If you have Cargo installed, run `cargo install git-profile`. You can also grab a pre-built (Mac) binaries from the releases page. 
+It should be installed on your path as `git-profile`. The `git-` suffix allows it to be called like any other git command.
 
 ## Usage
-
-*git-profile* should be installed as a binary named `git-profile`. The `git-` prefix means we can use it like any other
-git command.
 
 ### Create a profile
 At a minimum you need a profile name (best to keep this quite short), your author name and author email.
