@@ -7,7 +7,7 @@ your life easier.
 
 ## Install
 
-If you have Cargo installed, run `cargo install git-profile`. You can also grab a pre-built (Mac) binaries from the releases page. 
+If you have Cargo installed, run `cargo install git-profile`. You can also grab a pre-built (Mac) binaries from the releases page.
 It should be installed on your path as `git-profile`. The `git-` prefix allows it to be called like any other git command.
 
 ## Usage
@@ -15,11 +15,11 @@ It should be installed on your path as `git-profile`. The `git-` prefix allows i
 ### Create a profile
 At a minimum you need a profile name (best to keep this quite short), your author name and author email.
 
-`git profile add github 'Forename Surname' 'open-source@personal.com'`
+`git profile new github 'Forename Surname' 'open-source@personal.com'`
 
 Create a profile with a custom URL scheme:
 
-`git profile add github-work 'Forename Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
+`git profile new github-work 'Forename Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
 
 ### Switch profiles
 The `use` command switches you between profiles. This sets the profile for the repository in your current working directory.
