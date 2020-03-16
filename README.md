@@ -8,7 +8,7 @@ your life easier.
 ## Install
 
 If you have Cargo installed, run `cargo install git-profile`. You can also grab a pre-built (Mac) binaries from the releases page. 
-It should be installed on your path as `git-profile`. The `git-` suffix allows it to be called like any other git command.
+It should be installed on your path as `git-profile`. The `git-` prefix allows it to be called like any other git command.
 
 ## Usage
 
