@@ -18,7 +18,7 @@ At a minimum you need a profile name (best to keep this quite short), your autho
 
 Create a profile with a custom URL scheme:
 
-`git profile add github-work 'Forname Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
+`git profile add github-work 'Forename Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
 
 ### Switch profiles
 The `use` command switches you between profiles. This sets the profile for the repository in your current working directory.
