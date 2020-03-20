@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate clap;
 extern crate dirs;
 extern crate serde_derive;
@@ -104,10 +105,12 @@ impl GitProfilesApp<'_> {
     }
 
     fn parse_args(&mut self) {
-        self.args = Some(App::new("git-profile")
-                .version("0.1")
-                .author("David Futcher <david@futcher.io>")
-                .about("Easy multi-identity profiles for git")
+        #[allow(deprecated)]
+        let author = crate_authors!("\n").lines().next().unwrap();
+
+        self.args = Some(
+            app_from_crate!()
+                .author(author)
                 .subcommand(
                     SubCommand::with_name("new")
                         .about("Create new profile")
