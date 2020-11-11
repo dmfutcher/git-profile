@@ -105,7 +105,6 @@ impl GitProfilesApp<'_> {
     }
 
     fn parse_args(&mut self) {
-        #[allow(deprecated)]
         let author = crate_authors!("\n").lines().next().unwrap();
 
         self.args = Some(
