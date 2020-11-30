@@ -10,7 +10,7 @@ repository = "https://github.com/bobbo/git-profile"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "2"
+clap = "2.33.3"
 dirs = "2"
 ramhorns = "0.5"
 serde = "1.0"
