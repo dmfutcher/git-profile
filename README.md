@@ -15,11 +15,11 @@ It should be installed on your path as `git-profile`. The `git-` prefix allows i
 
 At a minimum you need a profile name (best to keep this quite short), your author name and author email.
 
-`git profile new github 'Forename Surname' 'open-source@personal.com'`
+`git profile new github 'Full Name' 'open-source@personal.com'`
 
 Create a profile with a custom URL scheme:
 
-`git profile new github-work 'Forename Surname' 'forename@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
+`git profile new github-work 'Full Name' 'name@work.com' --username CompanyName --remote 'git@github.com-work:{{username}}/{{project}}.git'`
 
 ### Switch profiles
 
@@ -62,13 +62,13 @@ Host oss.github.com
 
 ```toml
 [gh-work]
-author = 'Forename Surname (at work)'
+author = 'Full Name (at work)'
 email = 'me@work.com'
 username = 'MyWorkGithubOrganization'
 url = 'git@work.github.com:{{username}}/{{project}}.git'
 
 [open-source]
-author = 'Forename Surname'
+author = 'Full Name'
 email = 'my.open.source.contribs@example.com'
 username = 'my-oss-github-account'
 url = 'git@oss.github.com:{{username}}/{{project}}.git'
@@ -96,7 +96,7 @@ This is particularly handy when used in a sub-shell and combined with `git-remot
 
 ### Generate author string
 
-`git profile author` => 'Forename Surname \<your@email.address\>'
+`git profile author` => 'Full Name \<your@email.address\>'
 
 Can be used to easily fix commits when you've committed under the wrong profile:
 
